@@ -15,8 +15,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(APP_ID "com.okienko.SerialTerminal")
-set(APP_ID_GNOME "com.okienko.SerialTerminal.Gnome")
+set(APP_ID "io.github.Szaru3.SerialTerminal")
+set(APP_ID_GNOME "io.github.Szaru3.SerialTerminal.Gnome")
 
 set(QT_TARGET_NAME "serial-terminal")
 set(GNOME_TARGET_NAME "serial-terminal-gnome")

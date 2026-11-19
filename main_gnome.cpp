@@ -8,6 +8,7 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <fstream>
+#include <grp.h>
 #include <poll.h>
 #include <string>
 #include <sys/stat.h>
@@ -20,7 +21,7 @@
 #endif
 
 #ifndef APP_ID
-#define APP_ID "com.okienko.SerialTerminal.Gnome"
+#define APP_ID "io.github.Szaru3.SerialTerminal.Gnome"
 #endif
 
 namespace {
@@ -139,12 +140,44 @@ bool configureSerialPort(int fd, speed_t baudSpeed, std::string* errorOut) {
     return true;
 }
 
+std::string detectSerialGroup(const char* portPath) {
+    struct stat st {};
+    if (::stat(portPath, &st) == 0) {
+        if (struct group* gr = ::getgrgid(st.st_gid); gr && gr->gr_name && std::strcmp(gr->gr_name, "root") != 0) {
+            return gr->gr_name;
+        }
+    }
+    if (::getgrnam("uucp") != nullptr) {
+        return "uucp";
+    }
+    return "dialout";
+}
+
 int openSerialPort(const std::string& portPath, speed_t baudSpeed, std::string* errorOut) {
     int fd = ::open(portPath.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (fd < 0) {
+        const int openErr = errno;
         if (errorOut) {
-            *errorOut = std::string(trText("Failed to open ", "Nie udało się otworzyć ")) +
-                        portPath + ": " + std::strerror(errno);
+            const std::string sysErr = std::strerror(openErr);
+            if (openErr == EACCES || openErr == EPERM) {
+                const std::string groupName = detectSerialGroup(portPath.c_str());
+                if (isPolishLocale()) {
+                    *errorOut = "Nie udało się otworzyć " + portPath + ": " + sysErr +
+                                "\n\nTwoje konto użytkownika nie ma uprawnień do tego portu szeregowego. "
+                                "Dodaj się do grupy '" + groupName +
+                                "', a następnie wyloguj i zaloguj ponownie:\n\n"
+                                "sudo usermod -aG " + groupName + " \"$USER\"";
+                } else {
+                    *errorOut = "Failed to open " + portPath + ": " + sysErr +
+                                "\n\nYour user account does not have permission to access this serial port. "
+                                "Add yourself to the '" + groupName +
+                                "' group, then log out and log back in:\n\n"
+                                "sudo usermod -aG " + groupName + " \"$USER\"";
+                }
+            } else {
+                *errorOut = std::string(trText("Failed to open ", "Nie udało się otworzyć ")) +
+                            portPath + ": " + sysErr;
+            }
         }
         return -1;
     }
@@ -307,12 +340,64 @@ struct AppState {
         g_object_unref(menu);
     }
 
+    std::string settingsFilePath() const {
+        char* path = g_build_filename(g_get_user_config_dir(), "serial-terminal", "settings.ini", nullptr);
+        std::string result(path ? path : "");
+        g_free(path);
+        return result;
+    }
+
+    void loadSettings() {
+        const std::string path = settingsFilePath();
+        if (path.empty()) {
+            return;
+        }
+        GKeyFile* keyFile = g_key_file_new();
+        if (g_key_file_load_from_file(keyFile, path.c_str(), G_KEY_FILE_NONE, nullptr)) {
+            if (char* port = g_key_file_get_string(keyFile, "serial", "port", nullptr)) {
+                selectedPort = port;
+                g_free(port);
+            }
+            GError* err = nullptr;
+            int savedBaud = g_key_file_get_integer(keyFile, "serial", "baud_rate", &err);
+            if (!err) {
+                for (int i = 0; i < static_cast<int>(std::size(kBaudOptions)); ++i) {
+                    if (kBaudOptions[i].rate == savedBaud) {
+                        selectedBaudIndex = i;
+                        break;
+                    }
+                }
+            } else {
+                g_error_free(err);
+            }
+        }
+        g_key_file_free(keyFile);
+    }
+
+    void saveSettings() const {
+        const std::string path = settingsFilePath();
+        if (path.empty()) {
+            return;
+        }
+        char* dir = g_path_get_dirname(path.c_str());
+        if (dir) {
+            g_mkdir_with_parents(dir, 0700);
+            g_free(dir);
+        }
+        GKeyFile* keyFile = g_key_file_new();
+        g_key_file_set_string(keyFile, "serial", "port", selectedPort.c_str());
+        g_key_file_set_integer(keyFile, "serial", "baud_rate", kBaudOptions[selectedBaudIndex].rate);
+        g_key_file_save_to_file(keyFile, path.c_str(), nullptr);
+        g_key_file_free(keyFile);
+    }
+
     void selectPort(const std::string& port) {
         const bool wasRunning = (serialFd >= 0);
         if (port == selectedPort) {
             return;
         }
         selectedPort = port;
+        saveSettings();
         if (portAction) {
             g_simple_action_set_state(portAction, g_variant_new_string(selectedPort.c_str()));
         }
@@ -619,7 +704,7 @@ struct AppState {
             ADW_ABOUT_DIALOG(about),
             trText("A program for sending and receiving serial data.",
                    "Program do wysyłania i odbierania danych przez port szeregowy."));
-        adw_about_dialog_set_application_icon(ADW_ABOUT_DIALOG(about), "com.okienko.SerialTerminal");
+        adw_about_dialog_set_application_icon(ADW_ABOUT_DIALOG(about), "io.github.Szaru3.SerialTerminal");
         adw_dialog_present(about, GTK_WIDGET(window));
     }
 };
@@ -665,10 +750,13 @@ void onActivate(GtkApplication* app, gpointer userData) {
     gtk_window_set_title(GTK_WINDOW(state->window), trText("Serial Terminal", "Terminal szeregowy"));
     gtk_window_set_default_size(GTK_WINDOW(state->window), 800, 600);
 
-    // Pick initial serial port if available
-    const auto initialPorts = detectSerialPorts();
-    if (!initialPorts.empty()) {
-        state->selectedPort = initialPorts.front();
+    // Restore saved settings, or pick initial serial port if available
+    state->loadSettings();
+    if (state->selectedPort.empty()) {
+        const auto initialPorts = detectSerialPorts();
+        if (!initialPorts.empty()) {
+            state->selectedPort = initialPorts.front();
+        }
     }
 
     // Window actions
@@ -705,6 +793,7 @@ void onActivate(GtkApplication* app, gpointer userData) {
                 return;
             }
             st->selectedBaudIndex = idx;
+            st->saveSettings();
             g_simple_action_set_state(act, g_variant_new_int32(idx));
             st->updateInfoLabel();
             if (st->serialFd >= 0) {

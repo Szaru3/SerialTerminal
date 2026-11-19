@@ -9,7 +9,7 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
 
-  <developer id="com.okienko">
+  <developer id="io.github.szaru3">
     <name>Szaru3</name>
   </developer>
 
@@ -35,7 +35,6 @@
   <launchable type="desktop-id">@APP_ID@.desktop</launchable>
 
   <categories>
-    <category>Utility</category>
     <category>Development</category>
     <category>Electronics</category>
   </categories>

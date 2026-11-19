@@ -22,13 +22,17 @@
 #include <QLocale>
 #include <QPainter>
 #include <QColor>
+#include <QSettings>
+#include <QCloseEvent>
 #include <KWindowEffects>
 
 #include <algorithm>
 #include <cerrno>
 #include <cstring>
 #include <fcntl.h>
+#include <grp.h>
 #include <poll.h>
+#include <sys/stat.h>
 #include <termios.h>
 #include <unistd.h>
 
@@ -37,7 +41,7 @@
 #endif
 
 #ifndef APP_ID
-#define APP_ID "com.okienko.SerialTerminal"
+#define APP_ID "io.github.Szaru3.SerialTerminal"
 #endif
 
 namespace {
@@ -128,13 +132,42 @@ bool configureSerialPort(int fd, speed_t baudSpeed, QString* errorOut) {
     return true;
 }
 
+QString detectSerialGroup(const char* portPath) {
+    struct stat st {};
+    if (::stat(portPath, &st) == 0) {
+        if (struct group* gr = ::getgrgid(st.st_gid); gr && gr->gr_name && std::strcmp(gr->gr_name, "root") != 0) {
+            return QString::fromLocal8Bit(gr->gr_name);
+        }
+    }
+    if (::getgrnam("uucp") != nullptr) {
+        return QStringLiteral("uucp");
+    }
+    return QStringLiteral("dialout");
+}
+
 int openSerialPort(const QString& portPath, speed_t baudSpeed, QString* errorOut) {
     const QByteArray devBytes = portPath.toLocal8Bit();
     int fd = ::open(devBytes.constData(), O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (fd < 0) {
+        const int openErr = errno;
         if (errorOut) {
-            *errorOut = trText("Failed to open %1: %2", "Nie udało się otworzyć %1: %2")
-                            .arg(portPath, QString::fromLocal8Bit(std::strerror(errno)));
+            const QString sysErr = QString::fromLocal8Bit(std::strerror(openErr));
+            if (openErr == EACCES || openErr == EPERM) {
+                const QString groupName = detectSerialGroup(devBytes.constData());
+                *errorOut = trText(
+                    "Failed to open %1: %2\n\n"
+                    "Your user account does not have permission to access this serial port. "
+                    "Add yourself to the '%3' group, then log out and log back in:\n\n"
+                    "sudo usermod -aG %3 \"$USER\"",
+                    "Nie udało się otworzyć %1: %2\n\n"
+                    "Twoje konto użytkownika nie ma uprawnień do tego portu szeregowego. "
+                    "Dodaj się do grupy '%3', a następnie wyloguj i zaloguj ponownie:\n\n"
+                    "sudo usermod -aG %3 \"$USER\""
+                ).arg(portPath, sysErr, groupName);
+            } else {
+                *errorOut = trText("Failed to open %1: %2", "Nie udało się otworzyć %1: %2")
+                                .arg(portPath, sysErr);
+            }
         }
         return -1;
     }
@@ -193,7 +226,10 @@ class TranslucentWindow : public QMainWindow {
 public:
     explicit TranslucentWindow(QWidget* parent = nullptr) : QMainWindow(parent) {
         setWindowTitle(trText("Serial Terminal", "Terminal szeregowy"));
-        resize(800, 600);
+        QSettings settings;
+        resize(settings.value(QStringLiteral("window/size"), QSize(800, 600)).toSize());
+        const int savedBaudRate = settings.value(QStringLiteral("serial/baudRate"), 115200).toInt();
+        const QString savedPort = settings.value(QStringLiteral("serial/port")).toString();
 
         // Enable native Wayland per-pixel translucency
         setAttribute(Qt::WA_TranslucentBackground, true);
@@ -237,17 +273,30 @@ public:
         baudMenu->setMinimumWidth(140);
         m_baudActionGroup = new QActionGroup(this);
         m_baudActionGroup->setExclusive(true);
+        int defaultBaudIndex = 0;
+        for (int i = 0; i < static_cast<int>(std::size(kBaudOptions)); ++i) {
+            if (kBaudOptions[i].rate == 115200) {
+                defaultBaudIndex = i;
+            }
+            if (kBaudOptions[i].rate == savedBaudRate) {
+                m_selectedBaudIndex = i;
+            }
+        }
+        if (kBaudOptions[m_selectedBaudIndex].rate != savedBaudRate) {
+            m_selectedBaudIndex = defaultBaudIndex;
+        }
+
         for (int i = 0; i < static_cast<int>(std::size(kBaudOptions)); ++i) {
             QAction* act = baudMenu->addAction(QString::number(kBaudOptions[i].rate));
             act->setCheckable(true);
             act->setData(i);
             m_baudActionGroup->addAction(act);
-            if (kBaudOptions[i].rate == 115200) {
+            if (i == m_selectedBaudIndex) {
                 act->setChecked(true);
-                m_selectedBaudIndex = i;
             }
             connect(act, &QAction::triggered, this, [this, i]() {
                 m_selectedBaudIndex = i;
+                saveSettings();
                 updateInfoLabel();
                 if (m_serialFd >= 0) {
                     QString error;
@@ -282,10 +331,14 @@ public:
             );
         });
 
-        // Pick initial serial port if one is detected
-        const QStringList initialPorts = detectSerialPorts();
-        if (!initialPorts.isEmpty()) {
-            m_selectedPort = initialPorts.first();
+        // Restore saved serial port, or pick the first detected port
+        if (!savedPort.isEmpty()) {
+            m_selectedPort = savedPort;
+        } else {
+            const QStringList initialPorts = detectSerialPorts();
+            if (!initialPorts.isEmpty()) {
+                m_selectedPort = initialPorts.first();
+            }
         }
         populatePortMenu();
 
@@ -370,7 +423,19 @@ protected:
         }
     }
 
+    void closeEvent(QCloseEvent* event) override {
+        saveSettings();
+        QMainWindow::closeEvent(event);
+    }
+
 private:
+    void saveSettings() const {
+        QSettings settings;
+        settings.setValue(QStringLiteral("serial/port"), m_selectedPort);
+        settings.setValue(QStringLiteral("serial/baudRate"), kBaudOptions[m_selectedBaudIndex].rate);
+        settings.setValue(QStringLiteral("window/size"), size());
+    }
+
     void updateToggleButtonStyle(bool running) {
         if (running) {
             m_toggleButton->setText(trText("Stop", "Zatrzymaj"));
@@ -474,6 +539,7 @@ private:
             return;
         }
         m_selectedPort = port;
+        saveSettings();
         updateInfoLabel();
         if (wasRunning) {
             stopSerial();
@@ -683,6 +749,7 @@ private:
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
+    QApplication::setOrganizationName(QStringLiteral("SerialTerminal"));
     QApplication::setApplicationName(QStringLiteral("SerialTerminal"));
     QApplication::setApplicationDisplayName(trText("Serial Terminal", "Terminal szeregowy"));
     QApplication::setApplicationVersion(QStringLiteral(APP_VERSION));

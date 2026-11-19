@@ -1,0 +1,215 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Outer metallic bezel gradient -->
+    <linearGradient id="bezelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e9eff4" />
+      <stop offset="35%" stop-color="#c3cbd2" />
+      <stop offset="72%" stop-color="#8b949d" />
+      <stop offset="100%" stop-color="#646c74" />
+    </linearGradient>
+
+    <!-- Matte dark slate screen background -->
+    <radialGradient id="screenGrad" cx="50%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#282d34" />
+      <stop offset="65%" stop-color="#1b1e23" />
+      <stop offset="100%" stop-color="#121418" />
+    </radialGradient>
+
+    <!-- Brushed aluminum faceplate gradient -->
+    <linearGradient id="plateGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d8dee4" />
+      <stop offset="18%" stop-color="#edf1f5" />
+      <stop offset="52%" stop-color="#a5adb6" />
+      <stop offset="86%" stop-color="#7d858e" />
+      <stop offset="100%" stop-color="#5d646c" />
+    </linearGradient>
+
+    <!-- Subtle brushed horizontal sheen overlay -->
+    <pattern id="brushedMetal" width="24" height="4" patternUnits="userSpaceOnUse">
+      <rect width="24" height="1" y="0" fill="#ffffff" fill-opacity="0.06" />
+      <rect width="24" height="1" y="2" fill="#000000" fill-opacity="0.05" />
+    </pattern>
+
+    <!-- Faceplate clip path for brushed texture -->
+    <clipPath id="plateClip">
+      <rect x="104" y="254" width="304" height="132" rx="18" />
+    </clipPath>
+
+    <!-- D-sub outer recess gradient -->
+    <linearGradient id="recessGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#22262b" />
+      <stop offset="50%" stop-color="#3e444b" />
+      <stop offset="100%" stop-color="#69717a" />
+    </linearGradient>
+
+    <!-- Raised metallic D-sub shroud lip -->
+    <linearGradient id="shroudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f7fafc" />
+      <stop offset="35%" stop-color="#cfd6dd" />
+      <stop offset="70%" stop-color="#8b939c" />
+      <stop offset="100%" stop-color="#4e555d" />
+    </linearGradient>
+
+    <!-- Blue DB9 female plastic insert -->
+    <linearGradient id="blueInsertGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3b8ef3" />
+      <stop offset="55%" stop-color="#1e6ed1" />
+      <stop offset="100%" stop-color="#124a94" />
+    </linearGradient>
+
+    <!-- Symmetrical mounting socket gradients -->
+    <linearGradient id="socketOuterGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#f6f9fc" />
+      <stop offset="42%" stop-color="#b9c1c9" />
+      <stop offset="78%" stop-color="#6c747d" />
+      <stop offset="100%" stop-color="#3d434a" />
+    </linearGradient>
+
+    <linearGradient id="socketInnerGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#3a4047" />
+      <stop offset="50%" stop-color="#7f8790" />
+      <stop offset="100%" stop-color="#e5ebf0" />
+    </linearGradient>
+
+    <radialGradient id="socketHoleGrad" cx="45%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#0a0c0e" />
+      <stop offset="75%" stop-color="#171b1f" />
+      <stop offset="100%" stop-color="#2e343b" />
+    </radialGradient>
+
+    <!-- Soft drop shadow for whole icon -->
+    <filter id="iconShadow" x="-12%" y="-10%" width="124%" height="126%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000000" flood-opacity="0.34" />
+    </filter>
+
+    <!-- Crisp subtle glow for 9600_ readout -->
+    <filter id="textGlow" x="-15%" y="-25%" width="130%" height="150%">
+      <feGaussianBlur stdDeviation="3.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Drop shadow under DB9 faceplate -->
+    <filter id="plateShadow" x="-10%" y="-12%" width="120%" height="132%">
+      <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#000000" flood-opacity="0.55" />
+    </filter>
+
+    <!-- Drop shadow for raised metal shroud -->
+    <filter id="shroudShadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+
+    <!-- Reusable identical mounting socket (used on both left and right) -->
+    <g id="mountSocket">
+      <!-- Cast recess shadow -->
+      <circle cx="0" cy="2" r="19" fill="#181b1f" fill-opacity="0.65" />
+      <!-- Outer machined collar -->
+      <circle cx="0" cy="0" r="18" fill="url(#socketOuterGrad)" stroke="#23272c" stroke-width="1.2" />
+      <!-- Specular top rim -->
+      <circle cx="0" cy="0" r="16.8" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="0.9" />
+      <!-- Beveled inner countersink -->
+      <circle cx="0" cy="0" r="13.5" fill="url(#socketInnerGrad)" stroke="#2b3036" stroke-width="0.8" />
+      <!-- Deep threaded hole -->
+      <circle cx="0" cy="0" r="9" fill="url(#socketHoleGrad)" stroke="#111316" stroke-width="1.2" />
+      <!-- Subtle inner rim glint -->
+      <path d="M -5.5,6.8 A 8.8,8.8 0 0,0 7.2,-4.5" fill="none" stroke="#9ea7b0" stroke-opacity="0.35" stroke-width="1" />
+    </g>
+
+    <!-- Reusable DB9 female pin hole -->
+    <g id="pinHole">
+      <!-- Bottom bevel highlight on blue plastic -->
+      <circle cx="0" cy="1" r="7.2" fill="#6cb4ff" fill-opacity="0.45" />
+      <!-- Outer dark chamfer -->
+      <circle cx="0" cy="0" r="6.8" fill="#102d57" />
+      <!-- Deep pin socket -->
+      <circle cx="0" cy="0.4" r="5" fill="#070c14" stroke="#215599" stroke-width="0.9" />
+    </g>
+  </defs>
+
+  <!-- Outer Metallic Squircle Bezel -->
+  <rect x="44" y="44" width="424" height="424" rx="102" fill="url(#bezelGrad)" filter="url(#iconShadow)" />
+  <rect x="46" y="46" width="420" height="420" rx="100" fill="none" stroke="#ffffff" stroke-opacity="0.4" stroke-width="1.5" />
+
+  <!-- Thin Dark Inner Rim -->
+  <rect x="57" y="57" width="398" height="398" rx="90" fill="#0d0f12" />
+
+  <!-- Matte Charcoal Screen Surface -->
+  <rect x="63" y="63" width="386" height="386" rx="84" fill="url(#screenGrad)" />
+  <rect x="64" y="64" width="384" height="384" rx="83" fill="none" stroke="#ffffff" stroke-opacity="0.06" stroke-width="1.5" />
+
+  <!-- Custom Vector Typography: 9600_ (with slashed zeros) -->
+  <g filter="url(#textGlow)" fill="none" stroke="#ffffff" stroke-width="10.5" stroke-linecap="butt" stroke-linejoin="round">
+    <!-- Digit: 9 -->
+    <g transform="translate(111.5, 118)">
+      <ellipse cx="22" cy="21" rx="22" ry="21" />
+      <path d="M 44,21 L 44,38 C 44,60 31,74 11,74 L 4,74" />
+    </g>
+
+    <!-- Digit: 6 (exact 180-degree geometric match of 9) -->
+    <g transform="translate(173.5, 118) rotate(180 22 37)">
+      <ellipse cx="22" cy="21" rx="22" ry="21" />
+      <path d="M 44,21 L 44,38 C 44,60 31,74 11,74 L 4,74" />
+    </g>
+
+    <!-- Digit: 0 (slashed) -->
+    <g transform="translate(235.5, 118)">
+      <rect x="0" y="0" width="44" height="74" rx="22" ry="22" />
+      <line x1="7" y1="62" x2="37" y2="12" stroke-width="8.5" />
+    </g>
+
+    <!-- Digit: 0 (slashed) -->
+    <g transform="translate(297.5, 118)">
+      <rect x="0" y="0" width="44" height="74" rx="22" ry="22" />
+      <line x1="7" y1="62" x2="37" y2="12" stroke-width="8.5" />
+    </g>
+
+    <!-- Cursor: _ -->
+    <rect x="359.5" y="191" width="46" height="10.5" rx="1" fill="#ffffff" stroke="none" />
+  </g>
+
+  <!-- DB9 Female Serial Port Assembly -->
+  <g filter="url(#plateShadow)">
+    <!-- Brushed Aluminum Mounting Faceplate -->
+    <rect x="104" y="254" width="304" height="132" rx="18" fill="url(#plateGrad)" stroke="#1a1e22" stroke-width="1.5" />
+    <rect x="104" y="254" width="304" height="132" rx="18" fill="url(#brushedMetal)" clip-path="url(#plateClip)" />
+    <!-- Top metallic rim highlight -->
+    <rect x="105.5" y="255.5" width="301" height="129" rx="16.5" fill="none" stroke="#ffffff" stroke-opacity="0.5" stroke-width="1.2" />
+
+    <!-- Identical Left and Right Mounting Sockets -->
+    <use href="#mountSocket" x="136" y="320" />
+    <use href="#mountSocket" x="376" y="320" />
+
+    <!-- Recessed D-Sub Pocket in Faceplate -->
+    <path d="M 188,272 L 324,272 C 337,272 344,281 342,294 L 334,346 C 332,358 322,366 310,366 L 202,366 C 190,366 180,358 178,346 L 170,294 C 168,281 175,272 188,272 Z" fill="url(#recessGrad)" stroke="#181b1f" stroke-width="1.2" />
+
+    <!-- Raised Metallic D-Sub Shroud -->
+    <g filter="url(#shroudShadow)">
+      <path d="M 191,279 L 321,279 C 332,279 339,287 337,298 L 330,342 C 328,352 319,359 309,359 L 203,359 C 193,359 184,352 182,342 L 175,298 C 173,287 180,279 191,279 Z" fill="url(#shroudGrad)" stroke="#23282d" stroke-width="1.2" />
+      <!-- Crisp metallic top highlight on shroud lip -->
+      <path d="M 191,280.5 L 321,280.5 C 330.5,280.5 336.5,287 335,297" fill="none" stroke="#ffffff" stroke-opacity="0.7" stroke-width="1.2" />
+    </g>
+
+    <!-- Dark Inner Cavity Behind Blue Insert -->
+    <path d="M 194,284.5 L 318,284.5 C 326.5,284.5 332,291 330.5,299.5 L 324,339 C 322.5,347.5 315,353.5 306.5,353.5 L 205.5,353.5 C 197,353.5 189.5,347.5 188,339 L 181.5,299.5 C 180,291 185.5,284.5 194,284.5 Z" fill="#121821" />
+
+    <!-- Blue DB9 Female Plastic Insert -->
+    <path d="M 195.5,286.5 L 316.5,286.5 C 324,286.5 329.5,292 328,300 L 322,337.5 C 320.5,345 313.5,351 305.5,351 L 206.5,351 C 198.5,351 191.5,345 190,337.5 L 184,300 C 182.5,292 188,286.5 195.5,286.5 Z" fill="url(#blueInsertGrad)" stroke="#0d2a52" stroke-width="1.2" />
+    <!-- Subtle inner highlight on blue plastic -->
+    <path d="M 196,288 L 316,288 C 322.5,288 327,292.5 326,299.5" fill="none" stroke="#85c2ff" stroke-opacity="0.5" stroke-width="1.2" />
+
+    <!-- 9 Pin Holes (5 top row, 4 bottom row) -->
+    <!-- Top row -->
+    <use href="#pinHole" x="204" y="307" />
+    <use href="#pinHole" x="230" y="307" />
+    <use href="#pinHole" x="256" y="307" />
+    <use href="#pinHole" x="282" y="307" />
+    <use href="#pinHole" x="308" y="307" />
+    <!-- Bottom row -->
+    <use href="#pinHole" x="217" y="332" />
+    <use href="#pinHole" x="243" y="332" />
+    <use href="#pinHole" x="269" y="332" />
+    <use href="#pinHole" x="295" y="332" />
+  </g>
+</svg>
