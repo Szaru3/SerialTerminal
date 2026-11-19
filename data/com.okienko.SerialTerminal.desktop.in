@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=Serial Terminal
+Name[pl]=Terminal szeregowy
+GenericName=Serial Port Terminal
+GenericName[pl]=Terminal portu szeregowego
+Comment=Send and receive data over serial ports
+Comment[pl]=Wysyłanie i odbieranie danych przez porty szeregowe
+Exec=@QT_TARGET_NAME@
+Icon=@APP_ID@
+Terminal=false
+Categories=Development;Electronics;
+Keywords=serial;uart;tty;rs232;terminal;com;
+StartupNotify=true

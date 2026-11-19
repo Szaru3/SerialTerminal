@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>@APP_ID@</id>
+  <name>Serial Terminal</name>
+  <name xml:lang="pl">Terminal szeregowy</name>
+  <summary>Send and receive data over serial ports</summary>
+  <summary xml:lang="pl">Wysyłanie i odbieranie danych przez porty szeregowe</summary>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <developer id="com.okienko">
+    <name>Szaru3</name>
+  </developer>
+
+  <url type="homepage">https://github.com/Szaru3/SerialTerminal</url>
+  <url type="bugtracker">https://github.com/Szaru3/SerialTerminal/issues</url>
+
+  <description>
+    <p>
+      Serial Terminal is a lightweight Linux desktop application for communicating
+      with serial devices (UART, USB-to-serial adapters, microcontrollers, and
+      embedded hardware).
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>Automatic detection of available Linux serial ports</li>
+      <li>Configurable standard baud rates from 300 to 921600</li>
+      <li>Save received output to a file</li>
+      <li>Native Qt6/KDE and GTK4/Libadwaita frontends</li>
+      <li>English and Polish localization</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">@APP_ID@.desktop</launchable>
+
+  <categories>
+    <category>Utility</category>
+    <category>Development</category>
+    <category>Electronics</category>
+  </categories>
+
+  <content_rating type="oars-1.1" />
+
+  <releases>
+    <release version="@PROJECT_VERSION@" date="2026-11-19">
+      <description>
+        <p>Initial release with Qt6/KDE and GTK4/Libadwaita frontends.</p>
+      </description>
+    </release>
+  </releases>
+</component>

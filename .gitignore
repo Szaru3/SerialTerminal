@@ -1,0 +1,29 @@
+# Build directories
+build/
+build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+
+# Compiled binaries & objects
+SerialTerminal
+SerialTerminal-gnome
+serial-terminal
+serial-terminal-gnome
+*.o
+*.obj
+*.a
+*.so
+
+# Generated Wayland protocol files (legacy)
+*-protocol.c
+*-client-protocol.h
+
+# Editor / IDE files
+.vscode/
+.idea/
+.cache/
+compile_commands.json
+*.swp
+*~
