@@ -44,7 +44,7 @@ sudo dnf install git cmake ninja-build gcc-c++ qt6-qtbase-devel kf6-kwindowsyste
 
 **Debian / Ubuntu:**
 ```bash
-sudo apt install git cmake ninja-build g++ qt6-base-dev libkf6windowsystem-dev
+sudo apt update && sudo apt install git cmake ninja-build g++ qt6-base-dev libkf6windowsystem-dev
 ```
 
 ### 2. Clone and build
@@ -87,7 +87,7 @@ sudo dnf install git cmake ninja-build gcc-c++ pkgconf-pkg-config gtk4-devel lib
 
 **Debian / Ubuntu:**
 ```bash
-sudo apt install git cmake ninja-build g++ pkg-config libgtk-4-dev libadwaita-1-dev
+sudo apt update && sudo apt install git cmake ninja-build g++ pkg-config libgtk-4-dev libadwaita-1-dev
 ```
 
 ### 2. Clone and build
