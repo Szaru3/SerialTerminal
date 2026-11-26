@@ -8,6 +8,10 @@
   A lightweight Linux desktop application for communicating over serial ports (UART, USB-to-serial adapters, microcontrollers, and embedded hardware).
 </p>
 
+<p align="center">
+  <img src="assets/screenshot.png" alt="SerialTerminal screenshot" width="840" />
+</p>
+
 ## Features
 
 - Automatic detection of Linux serial ports (`/sys/class/tty`), plus custom port paths (e.g. `/dev/pts/2`)
